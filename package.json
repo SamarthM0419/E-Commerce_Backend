@@ -1,0 +1,23 @@
+{
+  "name": "e-commerce",
+  "version": "1.0.0",
+  "description": "E-Commerce website for product management , order management etc",
+  "keywords": [
+    "nodejs",
+    "expressjs",
+    "mongodb",
+    "reddis",
+    "javascript"
+  ],
+  "license": "ISC",
+  "author": "Samarth",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
