@@ -4,6 +4,8 @@ require("dotenv").config();
 
 const app = express();
 
+app.post("/signup", (req, res) => {});
+
 connectAuthDb()
   .then(() => {
     app.listen(process.env.PORT, () => {

@@ -1,0 +1,3 @@
+authService:
+
+- signUp - POST
