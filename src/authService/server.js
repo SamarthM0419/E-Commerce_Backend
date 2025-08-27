@@ -1,10 +1,10 @@
 const express = require("express");
 const connectAuthDb = require("./authDatabase");
 require("dotenv").config();
-
+const Auth = require("./authDatabase");
 const app = express();
 
-app.post("/signup", (req, res) => {});
+app.use(express.json());
 
 connectAuthDb()
   .then(() => {
