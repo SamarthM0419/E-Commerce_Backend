@@ -15,3 +15,6 @@
 
 - adding express json middleware to read the json
 - adding validations on schema level (using npm i validator)
+
+- Encryting the password using bcrypt
+- bcrypt.hash(password(plain text) , saltrounds(layers on encryption) )

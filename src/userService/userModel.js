@@ -8,8 +8,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       ref: "Auth",
     },
-    firstName: { type: String, required: true },
-    lastName: { type: String },
+
     phoneNo: { type: String, unique: true },
 
     addresses: {

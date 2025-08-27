@@ -22,8 +22,9 @@ const authSchema = new mongoose.Schema(
         }
       },
     },
-    confirmPassword: { type: String, required: true },
 
+    firstName: { type: String, required: true },
+    lastName: { type: String },
     role: {
       type: String,
       enum: ["customer", "vendor", "admin"],
