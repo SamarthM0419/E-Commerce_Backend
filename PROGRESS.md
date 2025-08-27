@@ -17,4 +17,11 @@
 - adding validations on schema level (using npm i validator)
 
 - Encryting the password using bcrypt
-- bcrypt.hash(password(plain text) , saltrounds(layers on encryption) )
+- bcrypt.hash(password(plain text) , saltrounds(layers on encryption))
+- created /signup api.
+
+- login api
+    - checking if user is present
+    - checking the password is valid
+    - ifPasswordValid - generate JWT token and send it user using cookies. (res.cookie in expressJs).
+    - cookie parser to read the cookie

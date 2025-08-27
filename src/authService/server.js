@@ -4,9 +4,13 @@ require("dotenv").config();
 const Auth = require("./authModel");
 const { validateSignUpData } = require("../utils/validation");
 const bcrypt = require("bcrypt");
+const validator = require("validator");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   try {
@@ -30,6 +34,34 @@ app.post("/signup", async (req, res) => {
     res.status(400).send("ERROR: " + err.message);
   }
 });
+
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    if (!validator.isEmail(emailId)) {
+      res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const user = await Auth.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Innvalid credentials");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (isPasswordValid) {
+      const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+
+      res.cookie("token", token);
+      res.status(200).json({ message: "User login successful!!!" });
+    } else {
+      res.status(400).json({ message: "Login failed!!!" });
+    }
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
+  }
+});
+
+  
 
 connectAuthDb()
   .then(() => {
