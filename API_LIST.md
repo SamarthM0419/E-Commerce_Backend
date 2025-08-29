@@ -21,3 +21,9 @@ authService:
   - JWT token (3 colors : red : header, pink : payload , blue : signature)
   - jsonwebtoken to create a jwt token
   - using jwt.sign() : which takes two arguments(data to be stored , SECRET KEY).
+
+- Creating auth middleware
+
+      - read the cookie from the req cookie.  (req.cookies)
+      - validate the token - finding the decodedObj = jwt.verify(token, process.env.JWT_SECRET).
+      - Find the user excluding password : await Auth.findById(_id).select("-password");

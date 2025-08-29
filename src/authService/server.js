@@ -47,11 +47,14 @@ app.post("/login", async (req, res) => {
       throw new Error("Innvalid credentials");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.validatePassword(password);
     if (isPasswordValid) {
-      const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+      const token = await user.getJWT();
 
-      res.cookie("token", token);
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 24 * 3600000),
+      });
+
       res.status(200).json({ message: "User login successful!!!" });
     } else {
       res.status(400).json({ message: "Login failed!!!" });
@@ -61,7 +64,12 @@ app.post("/login", async (req, res) => {
   }
 });
 
-  
+app.post("/logout", async (req, res) => {
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+  });
+  res.status(200).json({ message: "Logout SuccessFul!!" });
+});
 
 connectAuthDb()
   .then(() => {
