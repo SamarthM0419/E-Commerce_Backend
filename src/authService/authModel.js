@@ -3,6 +3,17 @@ const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const addressSchema = new mongoose.Schema(
+  {
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    country: { type: String, required: true },
+    postalCode: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
 const authSchema = new mongoose.Schema(
   {
     emailId: {
@@ -31,6 +42,41 @@ const authSchema = new mongoose.Schema(
       type: String,
       enum: ["customer", "vendor", "admin"],
       default: "customer",
+    },
+
+    phoneNo: {
+      type: String,
+      unique: true,
+      validate(value) {
+        if (!validator.isMobilePhone(value, "any")) {
+          throw new Error("Invalid phone number");
+        }
+      },
+    },
+
+    addresses: {
+      type: [addressSchema],
+      validate: {
+        validator: function (val) {
+          return val.length <= 3;
+        },
+        message: "Can store up to 3 addresses",
+      },
+      default: [],
+    },
+    photoUrl: {
+      type: String,
+      default:
+        "https://t3.ftcdn.net/jpg/03/46/83/96/240_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Invalid Photo Url");
+        }
+      },
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "prefer not to say"],
     },
   },
   {

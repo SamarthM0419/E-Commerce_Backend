@@ -27,3 +27,6 @@ authService:
       - read the cookie from the req cookie.  (req.cookies)
       - validate the token - finding the decodedObj = jwt.verify(token, process.env.JWT_SECRET).
       - Find the user excluding password : await Auth.findById(_id).select("-password");
+
+- logout - POST
+      - expires the cookie as we click on logout as token will be present in cookies and it will expire also.
