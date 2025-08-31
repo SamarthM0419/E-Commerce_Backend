@@ -30,3 +30,7 @@ authService:
 
 - logout - POST
       - expires the cookie as we click on logout as token will be present in cookies and it will expire also.
+
+
+
+

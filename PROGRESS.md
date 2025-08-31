@@ -25,3 +25,6 @@
     - checking the password is valid
     - ifPasswordValid - generate JWT token and send it user using cookies. (res.cookie in expressJs).
     - cookie parser to read the cookie
+
+
+- Express router : seperate router for auth and profile.

@@ -44,16 +44,6 @@ const authSchema = new mongoose.Schema(
       default: "customer",
     },
 
-    phoneNo: {
-      type: String,
-      unique: true,
-      validate(value) {
-        if (!validator.isMobilePhone(value, "any")) {
-          throw new Error("Invalid phone number");
-        }
-      },
-    },
-
     addresses: {
       type: [addressSchema],
       validate: {
