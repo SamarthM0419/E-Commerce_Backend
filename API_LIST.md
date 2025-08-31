@@ -31,6 +31,8 @@ authService:
 - logout - POST
       - expires the cookie as we click on logout as token will be present in cookies and it will expire also.
 
+- /profile/view  - GET
+      - check for userAuth middleware , if token is present will send back the response.
 
 
 

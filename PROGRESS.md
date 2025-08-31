@@ -28,3 +28,7 @@
 
 
 - Express router : seperate router for auth and profile.
+
+
+- profile/view api - GET
+        - check for userAuth middleware , if token is present will send back the response.
