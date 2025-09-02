@@ -35,4 +35,5 @@ authService:
       - check for userAuth middleware , if token is present will send back the response.
 
 
-
+- profile/edit - PATCH
+        - validate req.body and attach every key to its corresponding key and saves into database.

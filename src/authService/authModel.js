@@ -44,6 +44,10 @@ const authSchema = new mongoose.Schema(
       default: "customer",
     },
 
+    age : {
+      type : Number,
+    },
+
     addresses: {
       type: [addressSchema],
       validate: {
