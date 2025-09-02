@@ -28,12 +28,10 @@ authService:
       - validate the token - finding the decodedObj = jwt.verify(token, process.env.JWT_SECRET).
       - Find the user excluding password : await Auth.findById(_id).select("-password");
 
-- logout - POST
-      - expires the cookie as we click on logout as token will be present in cookies and it will expire also.
+- logout - POST - expires the cookie as we click on logout as token will be present in cookies and it will expire also.
 
-- /profile/view  - GET
-      - check for userAuth middleware , if token is present will send back the response.
+- /profile/view - GET - check for userAuth middleware , if token is present will send back the response.
 
+- profile/edit - PATCH - validate req.body and attach every key to its corresponding key and saves into database.
 
-- profile/edit - PATCH
-        - validate req.body and attach every key to its corresponding key and saves into database.
+- profile/changePassword - PATCH - change password by passing old and new password.

@@ -36,3 +36,9 @@
 
 - profile/edit - PATCH
         - validate req.body and attach every key to its corresponding key and saves into database.
+
+- profile/changePassword - patch
+        - get oldPassword , new Password from req.body
+        - comapare oldPassword with password present in db
+        - if true , encrypt the new password
+        - store the new password into database.
