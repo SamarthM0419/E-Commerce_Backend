@@ -53,3 +53,7 @@
 - publish (channel , message) -> serializes message into JSON , sends message to redis.
 - subscribe (channel , callback function) => parse the json
 
+working:
+- after signin , publish an event into redis server called user:signup
+- the notificationListener subscribes to that server and listens and when it encounters the published event, it will trigger an event to sendEmail() which is set up by nodemailer.
+

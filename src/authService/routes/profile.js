@@ -4,6 +4,8 @@ const { validateEditProfileData } = require("../utils/validation");
 const Auth = require("../authModel");
 const bcrypt = require("bcrypt");
 const profileRouter = express.Router();
+const { publish } = require("../../utils/eventBus.js");
+const validator = require("validator");
 
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
@@ -18,28 +20,41 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
     if (!validateEditProfileData(req)) {
-      return res.status(400).json({
-        message: "Invalid Edit request",
-      });
+      return res.status(400).json({ message: "Invalid Edit request" });
     }
 
-    const loggedInUser = req.user;
-    if (!validator.isEmail(req.body.emailId)) {
-      res.status(200).json({ message: "Invalid EmailId" });
+    const loggedInUser = await Auth.findById(req.user._id);
+
+    if (!loggedInUser) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    Object.keys(req.body).forEach((key) => (loggedInUser[key] = req.body[key]));
+    if (req.body.emailId && !validator.isEmail(req.body.emailId)) {
+      return res.status(400).json({ message: "Invalid EmailId" });
+    }
+
+    Object.keys(req.body).forEach((key) => {
+      loggedInUser[key] = req.body[key];
+    });
 
     await loggedInUser.save();
 
+    if (loggedInUser.emailId) {
+      await publish("user:profileUpdated", {
+        emailId: loggedInUser.emailId,
+        firstName: loggedInUser.firstName,
+      });
+    }
+
     return res.status(200).json({
-      message: `${loggedInUser.firstName} , your profile updated successfully`,
+      message: `${loggedInUser.firstName}, your profile updated successfully`,
       data: loggedInUser,
     });
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
   }
 });
+
 
 profileRouter.patch("/profile/changePassword", userAuth, async (req, res) => {
   try {
