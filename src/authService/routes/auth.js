@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const Auth = require("../authModel");
 const authRouter = express.Router();
 const validator = require("validator");
+const { publish } = require("../../utils/eventBus");
 
 authRouter.post("/signup", async (req, res) => {
   try {
@@ -21,6 +22,11 @@ authRouter.post("/signup", async (req, res) => {
 
     const savedUser = await user.save();
     const token = await savedUser.getJWT();
+
+    await publish("user:signedUp", {
+      emailId: savedUser.emailId,
+      firstName: savedUser.firstName,
+    });
 
     res.cookie("token", token, {
       expires: new Date(Date.now() + 24 * 3600000),

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const mailTransporter = require("../config/mailConfig");
 
 const sendEmail = async (to, subject, html) => {

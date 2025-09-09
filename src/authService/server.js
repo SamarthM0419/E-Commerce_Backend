@@ -2,6 +2,7 @@ const express = require("express");
 const connectAuthDb = require("./config/authDatabase");
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
+const { connectRedisDB } = require("../utils/eventBus");
 
 const app = express();
 app.use(express.json());
@@ -9,6 +10,10 @@ app.use(cookieParser());
 
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
+
+(async () => {
+  await connectRedisDB();
+})();
 
 app.use("/", authRouter);
 app.use("/", profileRouter);

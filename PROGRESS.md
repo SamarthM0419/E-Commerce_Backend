@@ -42,3 +42,14 @@
         - comapare oldPassword with password present in db
         - if true , encrypt the new password
         - store the new password into database.
+
+- using redis cloud  
+- created a .env with credentials
+
+-created a publisher and subscriber and attached error listeners , to detect error when it fails.
+- publisher.connect()
+- subscriber.connect() which establishes connections.
+
+- publish (channel , message) -> serializes message into JSON , sends message to redis.
+- subscribe (channel , callback function) => parse the json
+
