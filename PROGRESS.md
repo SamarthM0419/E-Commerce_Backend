@@ -57,3 +57,4 @@ working:
 - after signin , publish an event into redis server called user:signup
 - the notificationListener subscribes to that server and listens and when it encounters the published event, it will trigger an event to sendEmail() which is set up by nodemailer.
 
+- created a dataset of 1000 products containing images and pushed the image url into cloudinary(5000 images).
