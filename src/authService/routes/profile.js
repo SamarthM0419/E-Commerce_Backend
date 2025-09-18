@@ -10,7 +10,6 @@ const validator = require("validator");
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     const user = req.user;
-
     res.status(200).json({ data: user, message: "Profile Fetched Successful" });
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
@@ -54,7 +53,6 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     res.status(400).send("ERROR: " + err.message);
   }
 });
-
 
 profileRouter.patch("/profile/changePassword", userAuth, async (req, res) => {
   try {

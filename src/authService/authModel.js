@@ -44,8 +44,8 @@ const authSchema = new mongoose.Schema(
       default: "customer",
     },
 
-    age : {
-      type : Number,
+    age: {
+      type: Number,
     },
 
     addresses: {
@@ -80,9 +80,13 @@ const authSchema = new mongoose.Schema(
 
 authSchema.methods.getJWT = async function () {
   const user = this;
-  const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
-  });
+  const token = await jwt.sign(
+    { _id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "1d",
+    }
+  );
   return token;
 };
 

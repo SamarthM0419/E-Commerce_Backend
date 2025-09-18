@@ -2,10 +2,13 @@ const express = require("express");
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const { connectVendorDB } = require("./config/vendorDatabase");
-
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+
+const vendorRouter = require("./routes/vendorRoutes");
+
+app.use("/", vendorRouter);
 
 connectVendorDB()
   .then(() => {

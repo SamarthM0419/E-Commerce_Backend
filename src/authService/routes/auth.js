@@ -18,6 +18,7 @@ authRouter.post("/signup", async (req, res) => {
       lastName,
       emailId,
       password: passwordHash,
+      role: "customer",
     });
 
     const savedUser = await user.save();
@@ -55,7 +56,6 @@ authRouter.post("/login", async (req, res) => {
     const isPasswordValid = await user.validatePassword(password);
     if (isPasswordValid) {
       const token = await user.getJWT();
-
       res.cookie("token", token, {
         expires: new Date(Date.now() + 24 * 3600000),
       });
