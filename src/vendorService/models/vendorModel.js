@@ -68,6 +68,7 @@ const vendorSchema = new mongoose.Schema(
     lastLogin: {
       type: Date,
     },
+    rejectionReason: { type: String },
   },
   { timestamps: true }
 );
