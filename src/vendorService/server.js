@@ -7,8 +7,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 const vendorRouter = require("./routes/vendorRoutes");
+const adminRouter = require("./routes/adminRoutes");
 
 app.use("/", vendorRouter);
+app.use("/", adminRouter);
 
 connectVendorDB()
   .then(() => {
