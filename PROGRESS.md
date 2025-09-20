@@ -66,3 +66,7 @@ working:
 
   - "/apply" = customer applies to become vendor.
   - "/admin/requests" = fetches a list of requests.
+
+  - "/get/adminRequests = fetches a list of requests.
+  - "/admin/approval/:id/accept" = to accept the vendor request.
+  - "/admin/approval/:id/reject" = to reject the vendor request.

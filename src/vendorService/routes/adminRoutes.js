@@ -62,10 +62,14 @@ adminRouter.patch(
       }
 
       const vendorId = req.params.id;
-      const {rejectionReason} = req.body;
+      const { rejectionReason } = req.body;
       const vendorUpdateObj = Vendor.findByIdAndUpdate(
         vendorId,
-        { status: "rejected" , rejectionReason: rejectionReason || "No reason provided for rejection." },
+        {
+          status: "rejected",
+          rejectionReason:
+            rejectionReason || "No reason provided for rejection.",
+        },
         { new: true }
       );
 
@@ -82,4 +86,25 @@ adminRouter.patch(
   }
 );
 
+adminRouter.delete(
+  "admin/vendor/delete/:id",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      if (req.user.role !== "admin") {
+        res.status(403).json({ message: "Unauthorized access!. Admin's only" });
+      }
+      const vendorIdToDelete = req.params.id;
+      const vendorObj = await Vendor.findByIdAndDelete(vendorIdToDelete);
+
+      if (!vendorObj) {
+        res.status(404).json({ message: "Vendor not found" });
+      }
+
+      res.status(200).json({ message: "Vendor removed successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
 module.exports = adminRouter;
