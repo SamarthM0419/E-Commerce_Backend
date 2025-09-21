@@ -35,7 +35,7 @@ const vendorSchema = new mongoose.Schema(
     documents: [
       {
         type: {
-          type: String, // GST, PAN, Aadhaar
+          type: String, 
           required: true,
         },
       },

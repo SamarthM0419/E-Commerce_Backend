@@ -61,6 +61,7 @@ working:
 
 
 
+
 - created vendor service
   - config-> databaseConnections , models -> schema , middleware->check authentication , routes -> for    api's.
 
@@ -70,3 +71,6 @@ working:
   - "/get/adminRequests = fetches a list of requests.
   - "/admin/approval/:id/accept" = to accept the vendor request.
   - "/admin/approval/:id/reject" = to reject the vendor request.
+  - "/admin/vendor/delete/:id" = to delete a vendor.
+  - "/admin/vendor/deactivate/:id" = to deactivate a vendor.
+  - "/admin/vendors/statuspending" = to get vendors whose status is pending.

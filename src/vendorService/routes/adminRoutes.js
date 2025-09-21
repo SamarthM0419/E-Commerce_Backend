@@ -137,4 +137,42 @@ adminRouter.patch(
     }
   }
 );
+
+adminRouter.get(
+  "/admin/vendors/statuspending",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      if (req.user.role !== "admin") {
+        res
+          .status(403)
+          .json({ message: "Unauthorized Access!!! . Admin's only" });
+      }
+      const vendorsPendingStatus = await Vendor.find({
+        status: "pending",
+        isActive: true,
+      }).sort({ createdAt: -1 });
+
+      if (vendorsPendingStatus.length === 0) {
+        return res.status(200).json({
+          message: "No pending vendor requests",
+          vendors: [],
+        });
+      }
+
+      res.status(200).json({
+        message: "Vendors status pending list fetched successfully",
+        count: vendorsPendingStatus.length,
+        vendors: vendorsPendingStatus,
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: "Server error",
+        error: err.message,
+      });
+    }
+  }
+);
+
+
 module.exports = adminRouter;
