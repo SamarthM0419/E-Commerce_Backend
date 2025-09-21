@@ -87,7 +87,7 @@ adminRouter.patch(
 );
 
 adminRouter.delete(
-  "admin/vendor/delete/:id",
+  "/admin/vendor/delete/:id",
   authMiddleware,
   async (req, res) => {
     try {
