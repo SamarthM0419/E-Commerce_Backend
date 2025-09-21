@@ -107,4 +107,34 @@ adminRouter.delete(
     }
   }
 );
+
+adminRouter.patch(
+  "/admin/vendors/deactivate/:id",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      if (req.user.role !== "admin") {
+        res
+          .status(403)
+          .json({ message: "Unauthorized Access!!! . Admin's only" });
+      }
+      const vendorIdToDeactivate = req.params.id;
+      const vendorObj = Vendor.findByIdAndUpdate(
+        vendorIdToDeactivate,
+        { isActive: false },
+        { new: true }
+      );
+
+      if (!vendorObj) {
+        res.status(404).json({ message: "Vendor not found" });
+      }
+
+      res
+        .status(200)
+        .json({ message: "Vendor deactivated successfully", data: vendorObj });
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
 module.exports = adminRouter;

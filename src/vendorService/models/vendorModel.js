@@ -69,6 +69,10 @@ const vendorSchema = new mongoose.Schema(
       type: Date,
     },
     rejectionReason: { type: String },
+    isActive: {
+      type : Boolean,
+      default : true,
+    }
   },
   { timestamps: true }
 );
