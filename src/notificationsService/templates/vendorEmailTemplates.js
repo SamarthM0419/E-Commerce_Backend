@@ -1,5 +1,10 @@
 module.exports = {
-  vendorApply: ({ businessName, contactName, contactEmail, applicationDate }) => {
+  vendorApply: ({
+    businessName,
+    contactName,
+    contactEmail,
+    applicationDate,
+  }) => {
     return `
       <h2>🚀 New Vendor Application Alert!</h2>
       <p>Hello Admin,</p>
@@ -29,10 +34,9 @@ module.exports = {
     `;
   },
 
-  
-  vendorAccepted: ({ firstName, businessName }) => {
+  vendorAccepted: ({ contactName, businessName }) => {
     return `
-      <h2>🎉 Congratulations ${firstName}!</h2>
+      <h2>🎉 Congratulations ${contactName}!</h2>
       <p>Your vendor application for <b>${businessName}</b> has been approved!</p>
       <p>You're now officially part of our platform family. You can start listing your products and reach your customers right away.</p>
       <br/>
@@ -41,9 +45,9 @@ module.exports = {
     `;
   },
 
-  vendorRejected: ({ firstName, businessName, rejectionReason }) => {
+  vendorRejected: ({ contactName, businessName, rejectionReason }) => {
     return `
-      <h2>Hi ${firstName},</h2>
+      <h2>Hi ${contactName},</h2>
       <p>Thank you for your interest in joining our platform as a vendor.</p>
       <p>We regret to inform you that your application for <b>${businessName}</b> was not approved at this time 😔</p>
       ${rejectionReason ? `<p><b>Reason:</b> ${rejectionReason}</p>` : ""}

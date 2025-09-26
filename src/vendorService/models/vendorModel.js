@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const vendorSchema = new mongoose.Schema(
   {
@@ -20,6 +21,11 @@ const vendorSchema = new mongoose.Schema(
       type: String,
       required: true,
       lowercase: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Invalid Email Address");
+        }
+      },
     },
     contactPhone: {
       type: String,
@@ -35,7 +41,7 @@ const vendorSchema = new mongoose.Schema(
     documents: [
       {
         type: {
-          type: String, 
+          type: String,
           required: true,
         },
       },
@@ -70,9 +76,9 @@ const vendorSchema = new mongoose.Schema(
     },
     rejectionReason: { type: String },
     isActive: {
-      type : Boolean,
-      default : true,
-    }
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

@@ -1,6 +1,7 @@
 const express = require("express");
 const Vendor = require("../models/vendorModel");
 const authMiddleware = require("../middleware/authMiddleware");
+const { publish } = require("utils");
 
 const adminRouter = express.Router();
 
@@ -59,6 +60,16 @@ adminRouter.patch(
         return res.status(404).json({ message: "Vendor not found" });
       }
 
+      publish("vendor:decision", {
+        vendorId: vendorUpdate._id,
+        businessName: vendorUpdate.businessName,
+        contactEmail: vendorUpdate.contactEmail,
+        contactName: vendorUpdate.contactName,
+        status: vendorUpdate.status,
+        rejectionReason: vendorUpdate.rejectionReason || null,
+        updatedAt: new Date(),
+      });
+
       res.status(200).json({
         message: `Vendor ${
           action === "accept" ? "approved" : "rejected"
@@ -88,36 +99,6 @@ adminRouter.delete(
       }
 
       res.status(200).json({ message: "Vendor removed successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-);
-
-adminRouter.patch(
-  "/admin/vendors/deactivate/:id",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      if (req.user.role !== "admin") {
-        res
-          .status(403)
-          .json({ message: "Unauthorized Access!!! . Admin's only" });
-      }
-      const vendorIdToDeactivate = req.params.id;
-      const vendorObj = await Vendor.findByIdAndUpdate(
-        vendorIdToDeactivate,
-        { isActive: false },
-        { new: true }
-      );
-
-      if (!vendorObj) {
-        res.status(404).json({ message: "Vendor not found" });
-      }
-
-      res
-        .status(200)
-        .json({ message: "Vendor deactivated successfully", data: vendorObj });
     } catch (error) {
       res.status(500).json({ message: "Server error" });
     }
@@ -161,30 +142,45 @@ adminRouter.get(
 );
 
 adminRouter.patch(
-  "/admin/vendors/activate/:id",
+  "/admin/vendors/:id/:action",
   authMiddleware,
   async (req, res) => {
     try {
       if (req.user.role !== "admin") {
-        res
+        return res
           .status(403)
-          .json({ message: "Unauthorized Access!!! . Admin's only" });
+          .json({ message: "Unauthorized Access. Admins only" });
       }
-      const vendorIdToActivate = req.params.id;
+
+      const { id, action } = req.params;
+
+      let isActive;
+      if (action === "activate") {
+        isActive = true;
+      } else if (action === "deactivate") {
+        isActive = false;
+      } else {
+        return res
+          .status(400)
+          .json({ message: "Invalid action. Use 'activate' or 'deactivate'." });
+      }
+
       const vendorObj = await Vendor.findByIdAndUpdate(
-        vendorIdToActivate,
-        { isActive: true },
+        id,
+        { isActive },
         { new: true }
       );
 
       if (!vendorObj) {
-        res.status(404).json({ message: "Vendor not found" });
+        return res.status(404).json({ message: "Vendor not found" });
       }
 
-      res
-        .status(200)
-        .json({ message: "Vendor Activated successfully", data: vendorObj });
+      res.status(200).json({
+        message: `Vendor ${action}d successfully`,
+        data: vendorObj,
+      });
     } catch (error) {
+      console.error(error);
       res.status(500).json({ message: "Server error" });
     }
   }

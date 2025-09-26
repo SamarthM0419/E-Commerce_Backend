@@ -25,6 +25,10 @@ vendorRouter.post("/apply", authMiddleware, async (req, res) => {
       taxInfo,
     } = req.body;
 
+    if (!businessName || !contactName || !contactEmail) {
+      return res.status(400).json({ message: "Required fields missing" });
+    }
+
     const existingVendor = await Vendor.findOne({ userId });
     if (existingVendor) {
       return res.status(400).json({ message: "Vendor profile already exists" });

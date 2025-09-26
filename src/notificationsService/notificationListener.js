@@ -5,6 +5,8 @@ const signUpTemplate = require("./templates/signupTemplates");
 const profileUpdatedTemplate = require("./templates/profileUpdateTemplate");
 const {
   vendorApplicationReceived,
+  vendorAccepted,
+  vendorRejected,
 } = require("./templates/vendorEmailTemplates");
 
 const startNotificationListener = async () => {
@@ -30,8 +32,29 @@ const startNotificationListener = async () => {
       contactName: data.contactName,
       businessName: data.businessName,
     });
-
     await sendEmail(data.contactEmail, subject, html);
+  });
+
+  subscribe("vendor:decision", async (data) => {
+    const { contactName, contactEmail, businessName, status, rejectionReason } =
+      data;
+
+    let subject, html;
+    if (status === "approved") {
+      subject = `🎉 Congratulations! Your vendor application for ${businessName} is approved`;
+      html = vendorAccepted({
+        firstName: contactName,
+        businessName,
+      });
+    } else if (status === "rejected") {
+      subject = `Your vendor application for ${businessName} was rejected`;
+      html = vendorRejected({
+        firstName: contactName,
+        businessName,
+        rejectionReason,
+      });
+    }
+    await sendEmail(contactEmail, subject, html);
   });
 };
 
