@@ -74,3 +74,6 @@ working:
   - "/admin/vendor/delete/:id" = to delete a vendor.
   - "/admin/vendor/deactivate/:id" = to deactivate a vendor.
   - "/admin/vendors/statuspending" = to get vendors whose status is pending.
+
+
+  - created a seperate local module for utils - to connect to redis server so that we can publish events .

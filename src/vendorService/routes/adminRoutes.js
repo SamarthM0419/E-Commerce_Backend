@@ -24,63 +24,49 @@ adminRouter.get("/admin/requests", authMiddleware, async (req, res) => {
 });
 
 adminRouter.patch(
-  "/admin/approval/:id/accept",
+  "/admin/decision/:id/:action",
   authMiddleware,
   async (req, res) => {
     try {
       if (req.user.role !== "admin") {
-        res.status(403).json({ message: "Unauthorized Access . Admin's only" });
+        return res
+          .status(403)
+          .json({ message: "Unauthorized Access. Admins only" });
       }
-      const vendorId = req.params.id;
 
-      const vendorUpdate = await Vendor.findByIdAndUpdate(
-        vendorId,
-        { status: "approved" },
-        { new: true }
-      );
+      const { id, action } = req.params;
+      const { rejectionReason } = req.body || {};
+
+      let updateFields = {};
+
+      if (action === "accept") {
+        updateFields.status = "approved";
+      } else if (action === "reject") {
+        updateFields.status = "rejected";
+        updateFields.rejectionReason =
+          rejectionReason || "No reason provided for rejection.";
+      } else {
+        return res
+          .status(400)
+          .json({ message: "Invalid action. Use 'accept' or 'reject'." });
+      }
+
+      const vendorUpdate = await Vendor.findByIdAndUpdate(id, updateFields, {
+        new: true,
+      });
 
       if (!vendorUpdate) {
-        return res.status(404).json({ message: "Vendor not present" });
+        return res.status(404).json({ message: "Vendor not found" });
       }
 
-      res
-        .status(200)
-        .json({ message: "Vendor Updated successfully", vendorUpdate });
+      res.status(200).json({
+        message: `Vendor ${
+          action === "accept" ? "approved" : "rejected"
+        } successfully`,
+        vendor: vendorUpdate,
+      });
     } catch (error) {
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-);
-
-adminRouter.patch(
-  "/admin/approval/:id/reject",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      if (req.user.role !== "admin") {
-        res.status(403).json({ message: "Unauthorized Access. Admin's only" });
-      }
-
-      const vendorId = req.params.id;
-      const { rejectionReason } = req.body;
-      const vendorUpdateObj = Vendor.findByIdAndUpdate(
-        vendorId,
-        {
-          status: "rejected",
-          rejectionReason:
-            rejectionReason || "No reason provided for rejection.",
-        },
-        { new: true }
-      );
-
-      if (!vendorUpdateObj) {
-        return res.status(404).json({ message: "Vendor request not present" });
-      }
-
-      res
-        .status(200)
-        .json({ message: "Admin rejected our request", vendorUpdateObj });
-    } catch (error) {
+      console.error(error);
       res.status(500).json({ message: "Server error" });
     }
   }

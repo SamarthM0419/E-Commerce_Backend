@@ -1,7 +1,7 @@
 const express = require("express");
 const Vendor = require("../models/vendorModel");
 const authMiddleware = require("../middleware/authMiddleware");
-
+const { publish } = require("utils");
 const vendorRouter = express.Router();
 
 vendorRouter.post("/apply", authMiddleware, async (req, res) => {
@@ -44,7 +44,15 @@ vendorRouter.post("/apply", authMiddleware, async (req, res) => {
 
     const savedVendor = await vendor.save();
 
-    await 
+    await publish("vendor:applied", {
+      vendorId: savedVendor._id,
+      businessName,
+      contactName,
+      contactEmail,
+      contactPhone,
+      status: savedVendor.status,
+      appliedAt: new Date(),
+    });
 
     res.status(201).json({
       message: `${contactName} application submitted successfully!`,
@@ -54,7 +62,5 @@ vendorRouter.post("/apply", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
-
 
 module.exports = vendorRouter;
