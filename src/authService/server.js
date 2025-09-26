@@ -2,7 +2,7 @@ const express = require("express");
 const connectAuthDb = require("./config/authDatabase");
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
-const { connectRedisDB } = require("../utils/eventBus");
+const { connectRedisDB } = require("utils");
 
 const app = express();
 app.use(express.json());

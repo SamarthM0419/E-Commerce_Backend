@@ -44,6 +44,8 @@ vendorRouter.post("/apply", authMiddleware, async (req, res) => {
 
     const savedVendor = await vendor.save();
 
+    await 
+
     res.status(201).json({
       message: `${contactName} application submitted successfully!`,
       vendor: savedVendor,
