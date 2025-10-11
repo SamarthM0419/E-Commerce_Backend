@@ -2,6 +2,7 @@ const express = require("express");
 const Vendor = require("../models/vendorModel");
 const authMiddleware = require("../middleware/authMiddleware");
 const { publish } = require("utils");
+const { getCache, setCache } = require("../config/redisCache");
 
 const adminRouter = express.Router();
 
@@ -185,5 +186,44 @@ adminRouter.patch(
     }
   }
 );
+
+adminRouter.get("/admin/search", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized Access. Admins only" });
+    }
+
+    const { query } = req.query.query?.trim();
+
+    if (!query) {
+      return res
+        .status(400)
+        .json({ message: "Empty search field is not allowed" });
+    }
+
+    const cacheKey = `vendors:search:${query.toLowerCase()}`;
+
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      console.log("Cache Hit");
+      return res.json({ fromCache: true, data: cached });
+    }
+
+    console.log("Cache miss - DB Search");
+    const results = await Vendor.find({
+      $or: [
+        { businessName: { $regex: query, $options: "i" } },
+        { contactName: { $regex: query, $options: "i" } },
+      ],
+    });
+    await setCache(cacheKey, results, 60);
+    res.json({ fromCache: false, data: results });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 module.exports = adminRouter;

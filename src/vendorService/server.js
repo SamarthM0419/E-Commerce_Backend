@@ -3,6 +3,7 @@ require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const { connectVendorDB } = require("./config/vendorDatabase");
 const { connectRedisDB } = require("utils");
+const { connectRedis } = require("./config/redisCache");
 
 const app = express();
 app.use(express.json());
@@ -16,6 +17,10 @@ app.use("/", adminRouter);
 
 (async () => {
   await connectRedisDB();
+})();
+
+(async () => {
+  await connectRedis();
 })();
 
 connectVendorDB()
