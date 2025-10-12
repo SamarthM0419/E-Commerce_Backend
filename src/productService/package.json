@@ -1,0 +1,21 @@
+{
+  "name": "productservice",
+  "version": "1.0.0",
+  "description": "product management microservice for E-Commerce",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "author": "Samarth",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "mongoose": "^8.18.0",
+    "validator": "^13.15.15",
+    "redis": "^5.8.2",
+    "utils": "file:../utils"
+  }
+}
