@@ -195,7 +195,7 @@ adminRouter.get("/admin/search", authMiddleware, async (req, res) => {
         .json({ message: "Unauthorized Access. Admins only" });
     }
 
-    const { query } = req.query.query?.trim();
+    const query = req.query.query?.trim();
 
     if (!query) {
       return res
