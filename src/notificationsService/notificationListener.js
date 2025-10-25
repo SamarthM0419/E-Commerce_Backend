@@ -43,7 +43,7 @@ const startNotificationListener = async () => {
     if (status === "approved") {
       subject = `🎉 Congratulations! Your vendor application for ${businessName} is approved`;
       html = vendorAccepted({
-        firstName: contactName,
+        contactName,
         businessName,
       });
     } else if (status === "rejected") {
@@ -54,6 +54,7 @@ const startNotificationListener = async () => {
         rejectionReason,
       });
     }
+    console.log(firstName);
     await sendEmail(contactEmail, subject, html);
   });
 };
