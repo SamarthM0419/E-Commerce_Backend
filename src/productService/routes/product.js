@@ -2,6 +2,7 @@ const express = require("express");
 const productRouter = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const Product = require("../model/productModel");
+const { getCache, setCache } = require("../config/redisCache");
 
 productRouter.get("/products/feed", authMiddleware, async (req, res) => {
   try {
@@ -88,6 +89,78 @@ productRouter.get("/products/filter", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error in /filter:", error);
     res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
+productRouter.get("/search/products", authMiddleware, async (req, res) => {
+  try {
+    const {
+      title,
+      mainCategory,
+      department,
+      targetGroup,
+      productType,
+      page = 1,
+      limit = 20,
+    } = req.query;
+
+    const pageNumber = parseInt(page);
+    const pageSize = parseInt(limit);
+    const skip = (pageNumber - 1) * pageSize;
+
+    const cacheKey = `search:${title || ""}:${mainCategory || ""}:${
+      department || ""
+    }:${targetGroup || ""}:${
+      productType || ""
+    }:page=${pageNumber}:limit=${pageSize}`;
+
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json({
+        message: "SuccessFul (from cache)",
+        ...cachedData,
+        fromCache: true,
+      });
+    }
+
+    const filter = {};
+    if (title) filter.title = { $regex: title, $options: "i" };
+    if (mainCategory) filter.mainCategory = mainCategory;
+    if (department) filter.department = department;
+    if (targetGroup) filter.targetGroup = targetGroup;
+    if (productType) filter.productType = productType;
+
+    if (Object.keys(filter).length === 0) {
+      return res.status(400).json({
+        message: "Please provide at least one search parameter.",
+      });
+    }
+
+    const total = await Product.countDocuments(filter);
+    const totalPages = Math.ceil(total / pageSize);
+
+    const products = await Product.find(filter)
+      .skip(skip)
+      .limit(pageSize)
+      .select("-specifications");
+
+    const response = {
+      message: "Successful",
+      total,
+      page: pageNumber,
+      totalPages,
+      count: products.length,
+      data: products,
+      fromCache: false,
+    };
+
+    await setCache(cacheKey, response, 1500);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error("Search API Error:", err);
+    return res
+      .status(500)
+      .json({ message: "Server Error", error: err.message });
   }
 });
 
