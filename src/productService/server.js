@@ -8,8 +8,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 const productRouter = require("./routes/product");
+const userRouter = require("./routes/userProduct");
 
 app.use("/", productRouter);
+app.use("/", userRouter);
 
 connectProductDB()
   .then(() => {

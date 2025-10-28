@@ -213,10 +213,17 @@ productRouter.get("/sort/products", authMiddleware, async (req, res) => {
 
 productRouter.get("/products/categories", authMiddleware, async (req, res) => {
   try {
-    const mainCategories = await Product.distinct("mainCategory");
-    const departments = await Product.distinct("department");
-    const targetGroups = await Product.distinct("targetGroup");
-    const productTypes = await Product.distinct("productType");
+    const { mainCategory, department, targetGroup } = req.query;
+
+    const filter = {};
+    if(mainCategory) filter.mainCategory = mainCategory;
+    if(department) filter.department = department;
+    if(targetGroup) filter.targetGroup = targetGroup;
+
+    const mainCategories = await Product.distinct("mainCategory",filter);
+    const departments = await Product.distinct("department",filter);
+    const targetGroups = await Product.distinct("targetGroup",filter);
+    const productTypes = await Product.distinct("productType",filter);
 
     const response = {
       message: "Categories fetched Successfully",
