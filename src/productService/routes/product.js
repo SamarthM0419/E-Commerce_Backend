@@ -171,7 +171,7 @@ productRouter.get("/sort/products", authMiddleware, async (req, res) => {
       order = "asc",
       page = 1,
       size = 20,
-      limit = 30
+      limit = 30,
     } = req.query;
 
     let pageNumber = parseInt(page);
@@ -208,6 +208,34 @@ productRouter.get("/sort/products", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Sort API Error:", error);
     res.status(500).json({ message: "Server Error" });
+  }
+});
+
+productRouter.get("/products/categories", authMiddleware, async (req, res) => {
+  try {
+    const mainCategories = await Product.distinct("mainCategory");
+    const departments = await Product.distinct("department");
+    const targetGroups = await Product.distinct("targetGroup");
+    const productTypes = await Product.distinct("productType");
+
+    const response = {
+      message: "Categories fetched Successfully",
+      mainCategories,
+      departments,
+      targetGroups,
+      productTypes,
+      total: {
+        mainCategories: mainCategories.length,
+        departments: departments.length,
+        targetGroups: targetGroups.length,
+        productTypes: productTypes.length,
+      },
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Get Categories API Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 });
 
