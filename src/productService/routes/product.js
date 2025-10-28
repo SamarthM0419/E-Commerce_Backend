@@ -164,4 +164,51 @@ productRouter.get("/search/products", authMiddleware, async (req, res) => {
   }
 });
 
+productRouter.get("/sort/products", authMiddleware, async (req, res) => {
+  try {
+    const {
+      sortBy = "price.final",
+      order = "asc",
+      page = 1,
+      size = 20,
+      limit = 30
+    } = req.query;
+
+    let pageNumber = parseInt(page);
+    let pageSize = parseInt(size);
+    const skip = (pageNumber - 1) * pageSize;
+
+    const sortFields = sortBy.split(",");
+    const orderFields = order.split(",");
+
+    const sortObj = {};
+    sortFields.forEach((field, index) => {
+      const sortOrder = orderFields[index] === "desc" ? -1 : 1;
+      sortObj[field.trim()] = sortOrder;
+    });
+
+    const products = await Product.find({})
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limit)
+      .select("-specifications");
+
+    const total = await Product.countDocuments();
+    const totalPages = Math.ceil(total / pageSize);
+
+    res.status(200).json({
+      message: "Successful",
+      sortBy: sortObj,
+      total,
+      page: pageNumber,
+      totalPages,
+      count: products.length,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Sort API Error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
 module.exports = productRouter;

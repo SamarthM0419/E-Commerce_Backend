@@ -35,3 +35,14 @@ authService:
 - profile/edit - PATCH - validate req.body and attach every key to its corresponding key and saves into database.
 
 - profile/changePassword - PATCH - change password by passing old and new password.
+
+
+
+Product Service : 
+
+sort api : usage in postman 
+
+Sort by price ascending	/products/sort?sortBy=price&order=asc
+Sort by price descending	/products/sort?sortBy=price&order=desc
+Sort by rating descending	/products/sort?sortBy=rating&order=desc
+Sort by both (price asc, rating desc)	/products/sort?sortBy=price,rating&order=asc,desc
