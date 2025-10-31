@@ -58,14 +58,17 @@ userRouter.post(
 
       const imageUrls = [];
       for (const file of req.files) {
-        const uploadResult = await cloudinary.uploader.upload_stream(
-          { folder: "products" },
-          (error, result) => {
-            if (error) throw error;
-            imageUrls.push(result.secure_url);
-          }
-        );
-        uploadResult.end(file.buffer);
+        const imageUrl = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "products" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result.secure_url);
+            }
+          );
+          uploadStream.end(file.buffer);
+        });
+        imageUrls.push(imageUrl);
       }
 
       const product = new Product({
@@ -87,6 +90,30 @@ userRouter.post(
 
       await product.save();
       res.status(201).json({ message: "Product added successfully", product });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Server Error", error });
+    }
+  }
+);
+
+userRouter.delete(
+  "/product/deleteById/:id",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { role } = req.user;
+      if (!["admin", "vendor"].includes(role)) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      const id = req.params.id.trim();
+
+      const product = await Product.findById(req.params.id);
+      if (!product)
+        return res.status(404).json({ message: "Product not found" });
+
+      await Product.findByIdAndDelete(req.params.id);
+      res.json({ message: "Product deleted successfully" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Server Error", error });
