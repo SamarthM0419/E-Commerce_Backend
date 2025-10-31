@@ -3,10 +3,15 @@ const userRouter = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const Product = require("../model/productModel");
 const { setCache, getCache } = require("../config/redisCache");
+const multer = require("multer");
+const cloudinary = require("../config/cloudinary");
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 userRouter.get("/product/findById", authMiddleware, async (req, res) => {
   try {
-    const { productId } = req.query; 
+    const { productId } = req.query;
 
     const product = await Product.findById(productId).select("-specifications");
     if (!product) {
@@ -20,6 +25,14 @@ userRouter.get("/product/findById", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error("Find By Id API Error:", err);
     res.status(500).json({ message: "Server Error", error: err.message });
+  }
+});
+
+userRouter.post("/product/addProduct", authMiddleware, async (req, res) => {
+  try {
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error", error });
   }
 });
 
