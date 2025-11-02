@@ -7,6 +7,10 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+const WishlistRouter = require("./routes/wishlist");
+
+app.use("/", WishlistRouter);
+
 connectShoppingDatabase()
   .then(() => {
     app.listen(process.env.PORT, () => {
