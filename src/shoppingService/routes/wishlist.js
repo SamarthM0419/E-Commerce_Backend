@@ -2,6 +2,7 @@ const express = require("express");
 const WishlistRouter = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const Wishlist = require("../models/wishlist");
+const axios = require("axios");
 
 WishlistRouter.post(
   "/wishlist/addProduct",
@@ -11,62 +12,52 @@ WishlistRouter.post(
       const userId = req.user._id;
       const { productRefId } = req.body;
 
+      const PRODUCT_SERVICE_URL =
+        process.env.PRODUCT_SERVICE_URL || "http://localhost:5003";
+
+      const productRes = await axios.get(
+        `${PRODUCT_SERVICE_URL}/product/findById`,
+        { params: { productId: productRefId } }
+      );
+
+      const product = productRes.data.data;
+
+      const productSnapshot = {
+        productRefId,
+        title: product.title,
+        final_price: product.final_price,
+        image: product.images?.[0],
+        brand: product.brandName,
+        mainCategory: product.mainCategory,
+        department: product.department,
+        targetGroup: product.targetGroup,
+        rating: product.rating,
+        category: product.categoryPath,
+      };
+
       let wishlist = await Wishlist.findOne({ userId });
+
       if (!wishlist) {
-        wishlist = new Wishlist({ userId, items: [{ productRefId }] });
+        wishlist = new Wishlist({ userId, items: [productSnapshot] });
       } else {
-        const alreadyExists = wishlist.items.some(
+        const alreadyInWishlist = wishlist.items.some(
           (item) => item.productRefId.toString() === productRefId
         );
-        if (!alreadyExists) wishlist.items.push({ productRefId });
+        if (alreadyInWishlist)
+          return res
+            .status(200)
+            .json({ message: "Product already in wishlist" });
+
+        wishlist.items.push(productSnapshot);
       }
 
       await wishlist.save();
-      res.status(200).json({ message: "Added to Wishlist", wishlist });
+      res.status(200).json({ message: "Product added to wishlist", wishlist });
     } catch (err) {
       res.status(500).json({ message: "Server Error", error: err.message });
     }
   }
 );
 
-WishlistRouter.get(
-  "/wishlist/getProducts",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const userId = req.user._id;
-      const wishlist = await Wishlist.findOne({ userId })
-        .populate({
-          path: "items.productRefId",
-          select:
-            "title description rating price.final images category brandName",
-        })
-        .lean();
-      if (!wishlist) {
-        return res
-          .status(200)
-          .json({ messages: "No items in wishlist", items: [] });
-      }
-      const formatted = wishlist.items.map((item) => ({
-        id: item.productId?._id,
-        title: item.productId?.title,
-        image: item.productId?.images?.[0],
-        price: item.productId?.price.final,
-        brand: item.productId?.brandName,
-        category: item.productId?.category,
-        rating: item.productId?.rating,
-        addedAt: item.addedAt,
-      }));
-      res
-        .status(200)
-        .json({
-          message: " Wishlist fetched Successfully",
-          totalItems: formatted.length,
-          items: formatted,
-        });
-    } catch (err) {
-      res.status(500).json({ message: "Server Error", error: err.message });
-    }
-  }
-);
+
 module.exports = WishlistRouter;

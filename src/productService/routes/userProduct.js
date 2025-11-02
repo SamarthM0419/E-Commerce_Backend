@@ -9,7 +9,7 @@ const cloudinary = require("../config/cloudinary");
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-userRouter.get("/product/findById", authMiddleware, async (req, res) => {
+userRouter.get("/product/findById", async (req, res) => {
   try {
     const { productId } = req.query;
 
