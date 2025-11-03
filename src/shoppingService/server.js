@@ -8,8 +8,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 const WishlistRouter = require("./routes/wishlist");
+const CartRouter = require("./routes/cart");
 
 app.use("/", WishlistRouter);
+app.use("/", CartRouter);
 
 connectShoppingDatabase()
   .then(() => {

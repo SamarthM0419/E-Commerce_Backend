@@ -12,8 +12,8 @@ WishlistRouter.post(
       const userId = req.user._id;
       const { productRefId } = req.body;
 
-      const PRODUCT_SERVICE_URL =
-        process.env.PRODUCT_SERVICE_URL || "http://localhost:5003";
+      const PRODUCT_SERVICE_URL = "http://localhost:5003";
+      // process.env.PRODUCT_SERVICE_URL || ;
 
       const productRes = await axios.get(
         `${PRODUCT_SERVICE_URL}/product/findById`,
@@ -59,5 +59,87 @@ WishlistRouter.post(
   }
 );
 
+WishlistRouter.get(
+  "/wishlist/getProducts",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+
+      const wishlist = await Wishlist.findOne({ userId });
+      if (!wishlist || wishlist.items.length === 0) {
+        return res.status(200).json({ message: "Wishlist is Empty", data: [] });
+      }
+
+      res.status(200).json({
+        message: "Wishlist Fetched Successfully",
+        data: wishlist.items,
+      });
+    } catch (err) {
+      console.error("Get Wishlist Error:", err.message);
+      res.status(500).json({ message: "Server Error", error: err.message });
+    }
+  }
+);
+
+WishlistRouter.delete(
+  "/wishlist/removeProduct/:productRefId",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+      const { productRefId } = req.params;
+
+      const wishlist = await Wishlist.findOne({ userId });
+      if (!wishlist) {
+        return res.status(404).json({ message: "Wishlist not found" });
+      }
+
+      const productIndex = wishlist.items.findIndex(
+        (item) => item.productRefId.toString() === productRefId
+      );
+
+      if (productIndex === -1) {
+        return res
+          .status(404)
+          .json({ message: "Product not found in wishlist" });
+      }
+
+      wishlist.items.splice(productIndex, 1);
+      await wishlist.save();
+
+      res.status(200).json({
+        message: "Product removed from wishlist",
+        wishlist,
+      });
+    } catch (err) {
+      console.error("Remove Wishlist Error:", err.message);
+      res.status(500).json({ message: "Server Error", error: err.message });
+    }
+  }
+);
+
+WishlistRouter.delete(
+  "/wishlist/clearItems",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+
+      const wishlist = await Wishlist.findOne({ userId });
+      if (!wishlist) {
+        return res.status(404).json({ message: "Wishlist Not Found" });
+      }
+
+      wishlist.items = [];
+      await wishlist.save();
+
+      return res.status(200).json({ message: "Wishlist Cleared Successfully" });
+    } catch (err) {
+      console.error("Clear Wishlist Error:", err.message);
+      res.status(500).json({ message: "Server Error", error: err.message });
+    }
+  }
+);
 
 module.exports = WishlistRouter;

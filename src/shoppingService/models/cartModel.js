@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 
 const cartItemSchema = new mongoose.Schema({
-  productId: {
+  productRefId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
     required: true,
   },
+  title: { type: String, required: true },
+  image: { type: String },
   quantity: {
     type: Number,
     min: 1,
@@ -19,20 +20,39 @@ const cartItemSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  mainCategory: String,
+  department: String,
+  targetGroup: String,
 });
 
-const cartSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Auth",
-    unique: true,
-    requires: true,
+const cartSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Auth",
+      unique: true,
+      required: true,
+    },
+    items: [cartItemSchema],
+    totalAmount: {
+      type: Number,
+      default: 0,
+    },
+    lastUpdated: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  items: [cartItemSchema],
-  totalAmount: {
-    type: Number,
-    default: 0,
-  },
+  { timestamps: true }
+);
+
+cartSchema.pre("save", function (next) {
+  this.totalAmount = this.items.reduce(
+    (sum, item) => sum + item.priceAtAddedTime * item.quantity,
+    0
+  );
+  this.lastUpdated = new Date();
+  next();
 });
 
 module.exports = mongoose.model("Cart", cartSchema);
