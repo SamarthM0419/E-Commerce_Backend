@@ -56,4 +56,40 @@ orderRouter.post("/order/createFromCart", authMiddleware, async (req, res) => {
   }
 });
 
+orderRouter.get(
+  "/order/getMyOrdersByOrderStatus",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+      let { status } = req.query;
+
+      if (!status || status.trim() === "") {
+        status = "placed";
+      }
+
+      const filter = { userRefId: userId };
+      if (status) {
+        filter.orderStatus = status;
+      }
+
+      const orders = await Order.find(filter).sort({ createdAt: -1 });
+
+      if (!orders || orders.length === 0) {
+        return res.status(404).json({ message: "No Order Details Found" });
+      }
+
+      res.status(200).json({
+        message: "Order details fetched successfully",
+        totalOrders: orders.length,
+        filterApplied: status || "none",
+        data: orders,
+      });
+    } catch (err) {
+      console.error("Error fetching user orders:", err);
+      res.status(500).json({ message: "Failed to get Order details" });
+    }
+  }
+);
+
 module.exports = orderRouter;
