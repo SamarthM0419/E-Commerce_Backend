@@ -92,4 +92,49 @@ orderRouter.get(
   }
 );
 
+orderRouter.patch(
+  "/orders/:orderId/cancel",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+      const orderId = req.params.orderId;
+      const { deleteAfterCancel } = req.body || {};
+
+      const order = await Order.findOne({ _id: orderId, userRefId: userId });
+
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      if (order.orderStatus === "cancelled") {
+        return res.status(400).json({ message: "Order already cancelled" });
+      }
+
+      if (["shipped", "delivered"].includes(order.orderStatus)) {
+        return res.status(400).json({ message: "Cannot cancel this order" });
+      }
+
+      order.orderStatus = "cancelled";
+      await order.save();
+
+      if (deleteAfterCancel) {
+        await Order.deleteOne({ _id: orderId });
+        return res.status(200).json({
+          message: "Order cancelled and deleted successfully",
+          orderId,
+        });
+      }
+
+      res.status(200).json({
+        message: "Order cancelled successfully",
+        order,
+      });
+    } catch (err) {
+      console.error("Error cancelling order:", err);
+      res.status(500).json({ message: "Failed to cancel order" });
+    }
+  }
+);
+
 module.exports = orderRouter;
