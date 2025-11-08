@@ -51,4 +51,4 @@ const orderSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-module.exports = orderSchema;
+module.exports = mongoose.model("Order", orderSchema);
