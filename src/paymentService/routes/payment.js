@@ -4,6 +4,7 @@ const Payment = require("../models/payment");
 const authMiddleware = require("../middleware/authMiddleware");
 const axios = require("axios");
 const { getServiceUrl } = require("../config/serviceUrls");
+const { publish } = require("utils");
 
 const ORDER_SERVICE_URL = getServiceUrl("order");
 
@@ -90,14 +91,64 @@ paymentRouter.patch(
       }
 
       res.status(200).json({
-        message: `Payment marked as ${status} successfully`,
+        message: `Payment marked as ${status}`,
         payment,
       });
+
+      const eventPayload = {
+        type: status === "success" ? "payment.success" : "payment.failed",
+        data: {
+          userEmail: payment.userRefId.email,
+          userName: payment.userRefId.name,
+          orderId: payment.orderRefId,
+          amount: payment.amount,
+          transactionId: payment.transactionId,
+          timestamp: new Date().toISOString(),
+        },
+      };
+
+      await publish("payment-events", eventPayload);
+      console.log(`Published ${eventPayload.type} event`);
     } catch (err) {
       console.error("Error verifying payment:", err.message);
       res.status(500).json({ message: "Failed to verify payment" });
     }
   }
 );
+
+paymentRouter.get("/admin/payments", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "vendor") {
+      return res
+        .status(403)
+        .json({ message: "Access denied: Admin or Vendor only" });
+    }
+
+    const { status, method } = req.query;
+    const filter = {};
+
+    if (status) filter.status = status;
+    if (method) filter.paymentMethod = method;
+
+    const payments = await Payment.find(filter)
+      .populate("userRefId", "name email") 
+      .populate("orderRefId", "status totalPrice")
+      .sort({ createdAt: -1 })
+      .select(
+        "_id orderRefId userRefId amount paymentMethod status transactionId createdAt updatedAt"
+      );
+
+    if (payments.length === 0)
+      return res.status(404).json({ message: "No payments found" });
+
+    res.status(200).json({
+      total: payments.length,
+      payments,
+    });
+  } catch (err) {
+    console.error("Error fetching payments:", err.message);
+    res.status(500).json({ message: "Failed to retrieve payments" });
+  }
+});
 
 module.exports = paymentRouter;

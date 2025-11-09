@@ -2,13 +2,17 @@ const express = require("express");
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const { connectPaymentDatabase } = require("./config/paymentDatabase");
-
+const { connectRedisDB } = require("utils");
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
 
 const paymentRouter = require("./routes/payment");
 app.use("/", paymentRouter);
+
+(async () => {
+  await connectRedisDB();
+})();
 
 connectPaymentDatabase()
   .then(() => {

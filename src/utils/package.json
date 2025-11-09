@@ -1,5 +1,8 @@
 {
   "name": "utils",
   "version": "1.0.0",
-  "main": "eventBus.js"
+  "main": "eventBus.js",
+  "type": "commonjs",
+  "license": "ISC",
+  "description": "Shared utilities for event bus and common modules"
 }
