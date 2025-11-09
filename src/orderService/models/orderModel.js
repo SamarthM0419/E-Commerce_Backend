@@ -40,7 +40,7 @@ const orderSchema = new mongoose.Schema({
   },
   orderStatus: {
     type: String,
-    enum: ["placed", "confirmed", "shipped", "delivered", "cancelled"],
+    enum: ["placed", "confirmed", "shipped", "delivered", "cancelled", "paid"],
     default: "placed",
   },
   paymentRefId: {

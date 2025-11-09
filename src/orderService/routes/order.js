@@ -161,7 +161,9 @@ orderRouter.post("/orders/buyNow", authMiddleware, async (req, res) => {
 
     const finalPrice = product.price?.final ?? product.price;
     if (typeof finalPrice !== "number") {
-      return res.status(400).json({ message: "Invalid product price structure" });
+      return res
+        .status(400)
+        .json({ message: "Invalid product price structure" });
     }
 
     const totalAmount = finalPrice * quantity;
@@ -190,7 +192,10 @@ orderRouter.post("/orders/buyNow", authMiddleware, async (req, res) => {
       order,
     });
   } catch (err) {
-    console.error("Error creating Buy Now order:", err.response?.data || err.message);
+    console.error(
+      "Error creating Buy Now order:",
+      err.response?.data || err.message
+    );
     res.status(500).json({ message: "Failed to create Buy Now order" });
   }
 });
@@ -219,6 +224,29 @@ orderRouter.get("/orders/:orderId", authMiddleware, async (req, res) => {
   }
 });
 
+orderRouter.patch(
+  "/order/:orderId/updateStatus",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { status } = req.body;
+      const { orderId } = req.params;
 
+      const order = await Order.findById(orderId);
+      if (!order) return res.status(404).json({ message: "Order not found" });
+
+      order.orderStatus = status;
+      await order.save();
+
+      res.status(200).json({
+        message: "Order status updated successfully",
+        order,
+      });
+    } catch (err) {
+      console.error("Error updating order status:", err);
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  }
+);
 
 module.exports = orderRouter;

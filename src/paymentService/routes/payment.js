@@ -50,4 +50,54 @@ paymentRouter.post("/payment/initiate", authMiddleware, async (req, res) => {
   }
 });
 
+paymentRouter.patch(
+  "/admin/payment/verify/:paymentId",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      if (req.user.role !== "admin" && req.user.role !== "vendor") {
+        return res
+          .status(403)
+          .json({ message: "Access denied: Admin or Vendor only" });
+      }
+
+      const { paymentId } = req.params;
+      const { status, transactionId } = req.body;
+
+      if (!["success", "failed"].includes(status)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Use 'success' or 'failed'." });
+      }
+
+      const payment = await Payment.findById(paymentId);
+      if (!payment) {
+        return res.status(404).json({ message: "Payment not found" });
+      }
+
+      payment.status = status;
+      if (transactionId) payment.transactionId = transactionId;
+      await payment.save();
+
+      if (status === "success") {
+        const ORDER_SERVICE_URL = getServiceUrl("order");
+
+        await axios.patch(
+          `${ORDER_SERVICE_URL}/order/${payment.orderRefId}/updateStatus`,
+          { status: "paid" },
+          { headers: { Authorization: req.token } }
+        );
+      }
+
+      res.status(200).json({
+        message: `Payment marked as ${status} successfully`,
+        payment,
+      });
+    } catch (err) {
+      console.error("Error verifying payment:", err.message);
+      res.status(500).json({ message: "Failed to verify payment" });
+    }
+  }
+);
+
 module.exports = paymentRouter;
