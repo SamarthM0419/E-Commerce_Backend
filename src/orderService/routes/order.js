@@ -195,5 +195,30 @@ orderRouter.post("/orders/buyNow", authMiddleware, async (req, res) => {
   }
 });
 
+orderRouter.get("/orders/:orderId", authMiddleware, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.user._id;
+
+    const order = await Order.findOne({
+      _id: orderId,
+      userRefId: userId,
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json({
+      message: "Order fetched successfully",
+      order,
+    });
+  } catch (err) {
+    console.error("Error fetching order by ID:", err.message);
+    res.status(500).json({ message: "Failed to fetch order details" });
+  }
+});
+
+
 
 module.exports = orderRouter;
