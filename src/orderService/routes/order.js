@@ -137,4 +137,63 @@ orderRouter.patch(
   }
 );
 
+orderRouter.post("/orders/buyNow", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { productRefId, quantity, shippingAddress } = req.body;
+
+    if (!productRefId || !quantity || !shippingAddress) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const productResponse = await axios.get(
+      `http://localhost:5003/product/findById`,
+      {
+        params: { productId: productRefId },
+        headers: { Authorization: req.headers.authorization },
+      }
+    );
+
+    const product = productResponse.data.data;
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const finalPrice = product.price?.final ?? product.price;
+    if (typeof finalPrice !== "number") {
+      return res.status(400).json({ message: "Invalid product price structure" });
+    }
+
+    const totalAmount = finalPrice * quantity;
+
+    const order = await Order.create({
+      userRefId: userId,
+      items: [
+        {
+          productRefId,
+          title: product.title,
+          image: product.image || product.thumbnail,
+          quantity,
+          priceAtPurchase: finalPrice,
+          mainCategory: product.mainCategory || product.category,
+          department: product.department || "General",
+          targetGroup: product.targetGroup || "Unisex",
+        },
+      ],
+      totalAmount,
+      shippingAddress,
+      orderStatus: "placed",
+    });
+
+    res.status(201).json({
+      message: "Order placed successfully via Buy Now",
+      order,
+    });
+  } catch (err) {
+    console.error("Error creating Buy Now order:", err.response?.data || err.message);
+    res.status(500).json({ message: "Failed to create Buy Now order" });
+  }
+});
+
+
 module.exports = orderRouter;
