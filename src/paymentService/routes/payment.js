@@ -5,6 +5,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const axios = require("axios");
 const { getServiceUrl } = require("../config/serviceUrls");
 const { publish } = require("utils");
+const { mongoose } = require("mongoose");
 
 const ORDER_SERVICE_URL = getServiceUrl("order");
 
@@ -131,7 +132,7 @@ paymentRouter.get("/admin/payments", authMiddleware, async (req, res) => {
     if (method) filter.paymentMethod = method;
 
     const payments = await Payment.find(filter)
-      .populate("userRefId", "name email") 
+      .populate("userRefId", "name email")
       .populate("orderRefId", "status totalPrice")
       .sort({ createdAt: -1 })
       .select(
@@ -150,5 +151,54 @@ paymentRouter.get("/admin/payments", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Failed to retrieve payments" });
   }
 });
+
+paymentRouter.get("/payment/:paymentId", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "vendor") {
+      return res
+        .status(403)
+        .json({ message: "Access denied: Admin or Vendor only" });
+    }
+
+    const { paymentId } = req.params;
+
+    const payment = await Payment.findById(paymentId);
+    if (!payment) {
+      res.status(404).json({ message: "Payment history was not found" });
+    }
+
+    res.status(200).json({ message: "Payment Found Successfully", payment });
+  } catch (err) {
+    console.error("Error fetching payment:", err.message);
+    res.status(500).json({ message: "Failed to fetch payment details" });
+  }
+});
+
+paymentRouter.get(
+  "/payment/history/:userRefId",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { userRefId } = req.params;
+      const userObjectId = new mongoose.Types.ObjectId(userRefId);
+
+      const payments = await Payment.find({ userRefId: userObjectId });
+      if (!payments || payments.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No payment history found for this user" });
+      }
+      res.status(200).json({
+        message: "User payment history retrieved successfully",
+        total: payments.length,
+        payments,
+      });
+    } catch (err) {
+      console.error("Error fetching payments:", err.message);
+      res.status(500).json({ message: "Failed to fetch user payments" });
+    }
+  }
+);
+
 
 module.exports = paymentRouter;
