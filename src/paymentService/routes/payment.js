@@ -126,7 +126,10 @@ paymentRouter.patch(
         },
       };
 
-      await publish("payment-events", eventPayload);
+      await publish(
+        status === "success" ? "payment:success" : "payment:failed",
+        eventPayload.data
+      );
       console.log(`Published ${eventPayload.type} event`);
 
       res.status(200).json({
