@@ -90,17 +90,35 @@ paymentRouter.patch(
           { headers: { Authorization: req.token } }
         );
       }
+      const AUTH_SERVICE_URL = getServiceUrl("auth");
+      let userInfo = {};
+      try {
+        console.log(
+          "Fetching user from:",
+          `${AUTH_SERVICE_URL}/users/${payment.userRefId}`
+        );
 
-      res.status(200).json({
-        message: `Payment marked as ${status}`,
-        payment,
-      });
+        const userRes = await axios.get(
+          `${AUTH_SERVICE_URL}/users/${payment.userRefId}`,
+          { headers: { Authorization: req.token } }
+        );
+        userInfo = userRes.data?.data || {};
+        console.log(userInfo);
+      } catch (err) {
+        console.warn("⚠️ Could not fetch user info:", {
+          url: `${AUTH_SERVICE_URL}/users/${payment.userRefId}`,
+          status: err.response?.status,
+          statusText: err.response?.statusText,
+          data: err.response?.data,
+          message: err.message,
+        });
+      }
 
       const eventPayload = {
         type: status === "success" ? "payment.success" : "payment.failed",
         data: {
-          userEmail: payment.userRefId.email,
-          userName: payment.userRefId.name,
+          userEmail: userInfo.emailId,
+          userName: userInfo.firstName,
           orderId: payment.orderRefId,
           amount: payment.amount,
           transactionId: payment.transactionId,
@@ -110,6 +128,11 @@ paymentRouter.patch(
 
       await publish("payment-events", eventPayload);
       console.log(`Published ${eventPayload.type} event`);
+
+      res.status(200).json({
+        message: `Payment marked as ${status}`,
+        payment,
+      });
     } catch (err) {
       console.error("Error verifying payment:", err.message);
       res.status(500).json({ message: "Failed to verify payment" });
@@ -199,6 +222,5 @@ paymentRouter.get(
     }
   }
 );
-
 
 module.exports = paymentRouter;

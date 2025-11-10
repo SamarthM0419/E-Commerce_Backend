@@ -3,14 +3,15 @@ const orderRouter = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const Order = require("../models/orderModel");
 const axios = require("axios");
+const { getServiceUrl } = require("../config/serviceUrls");
 
 orderRouter.post("/order/createFromCart", authMiddleware, async (req, res) => {
   try {
     const userId = req.user._id;
     const { shippingAddress } = req.body;
 
-    const CART_SERVICE_URL =
-      "http://localhost:5004" || process.env.CART_SERVICE_URL;
+    const CART_SERVICE_URL = getServiceUrl("cart");
+    console.log(CART_SERVICE_URL);
 
     const cartResponse = await axios.get(
       `${CART_SERVICE_URL}/cart/getProducts`,
@@ -146,8 +147,9 @@ orderRouter.post("/orders/buyNow", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    const PRODUCT_SERVICE_URL = getServiceUrl("product");
     const productResponse = await axios.get(
-      `http://localhost:5003/product/findById`,
+      `${PRODUCT_SERVICE_URL}/product/findById`,
       {
         params: { productId: productRefId },
         headers: { Authorization: req.headers.authorization },

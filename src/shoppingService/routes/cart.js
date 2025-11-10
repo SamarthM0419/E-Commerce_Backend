@@ -3,6 +3,7 @@ const CartRouter = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const Cart = require("../models/cartModel");
 const axios = require("axios");
+const { getServiceUrl } = require("../config/serviceUrls");
 
 CartRouter.post("/cart/addProducts", authMiddleware, async (req, res) => {
   try {
@@ -13,8 +14,11 @@ CartRouter.post("/cart/addProducts", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Product ID is required" });
     }
 
+    const PRODUCT_SERVICE_URL = getServiceUrl("product");
+    console.log(PRODUCT_SERVICE_URL);
+
     const productRes = await axios.get(
-      `http://localhost:5003/product/findById`,
+      `${PRODUCT_SERVICE_URL}/product/findById`,
       {
         params: { productId: productRefId },
       }

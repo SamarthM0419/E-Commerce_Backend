@@ -85,4 +85,23 @@ profileRouter.patch("/profile/changePassword", userAuth, async (req, res) => {
   }
 });
 
+profileRouter.get("/users/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await Auth.findById(id).select("firstName emailId role");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "User fetched successfully",
+      data: user,
+    });
+  } catch (err) {
+    console.error("Error fetching user by ID:", err.message);
+    res.status(500).json({ message: "Failed to fetch user" });
+  }
+});
+
 module.exports = profileRouter;

@@ -8,7 +8,7 @@ const getServiceUrl = (serviceName) => {
     auth:
       ENV === "production"
         ? "http://auth-service"
-        : "http://localhost:5000",
+        : "http://localhost:5001",
     notification:
       ENV === "production"
         ? "http://notification-service"

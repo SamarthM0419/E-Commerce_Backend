@@ -2,8 +2,16 @@ const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema(
   {
-    orderRefId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    userRefId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    orderRefId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      required: true,
+    },
+    userRefId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Auth",
+      required: true,
+    },
     amount: { type: Number, required: true },
     paymentMethod: { type: String, default: "mock" },
     transactionId: String,
