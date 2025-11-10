@@ -1,0 +1,143 @@
+version: "3.8"
+
+services:
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: authService/Dockerfile
+    container_name: auth-service
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./authService/.env
+    volumes:
+      - ./authService:/app
+      - ./utils:/app/utils
+    depends_on:
+      - mongo
+
+  vendor-service:
+    build:
+      context: .
+      dockerfile: vendorService/Dockerfile
+    container_name: vendor-service
+    ports:
+      - "4001:4001"
+    env_file:
+      - ./vendorService/.env
+    volumes:
+      - ./vendorService:/app
+      - ./utils:/app/utils
+    depends_on:
+      - mongo
+      - auth-service
+
+
+  product-service:
+    build:
+      context: .
+      dockerfile: productService/Dockerfile
+    container_name: product-service
+    ports:
+      - "4002:4002"
+    env_file:
+      - ./productService/.env
+    volumes:
+      - ./productService:/app
+      - ./utils:/app/utils
+    depends_on:
+      - mongo
+      - vendor-service
+
+
+  order-service:
+    build:
+      context: .
+      dockerfile: orderService/Dockerfile
+    container_name: order-service
+    ports:
+      - "4003:4003"
+    env_file:
+      - ./orderService/.env
+    volumes:
+      - ./orderService:/app
+      - ./utils:/app/utils
+    depends_on:
+      - mongo
+      - product-service
+      - auth-service
+
+
+  shopping-service:
+    build:
+      context: .
+      dockerfile: shoppingService/Dockerfile
+    container_name: shopping-service
+    ports:
+      - "4004:4004"
+    env_file:
+      - ./shoppingService/.env
+    volumes:
+      - ./shoppingService:/app
+      - ./utils:/app/utils
+    depends_on:
+      - mongo
+      - order-service
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: paymentService/Dockerfile
+    container_name: payment-service
+    ports:
+      - "4005:4005"
+    env_file:
+      - ./paymentService/.env
+    volumes:
+      - ./paymentService:/app
+      - ./utils:/app/utils
+    depends_on:
+      - mongo
+      - order-service
+      - shopping-service
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notificationService/Dockerfile
+    container_name: notification-service
+    ports:
+      - "4007:4007"
+    env_file:
+      - ./notificationService/.env
+    volumes:
+      - ./notificationService:/app
+      - ./utils:/app/utils
+    depends_on:
+      - redis
+    restart: always
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+ 
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    restart: always
+
+volumes:
+  mongo_data:
+  redis_data:
