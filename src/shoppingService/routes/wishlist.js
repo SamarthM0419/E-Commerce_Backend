@@ -3,6 +3,7 @@ const WishlistRouter = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const Wishlist = require("../models/wishlist");
 const axios = require("axios");
+const { getServiceUrl } = require("../config/serviceUrls");
 
 WishlistRouter.post(
   "/wishlist/addProduct",
@@ -12,12 +13,13 @@ WishlistRouter.post(
       const userId = req.user._id;
       const { productRefId } = req.body;
 
-      const PRODUCT_SERVICE_URL = "http://localhost:5003";
-      // process.env.PRODUCT_SERVICE_URL || ;
+      const PRODUCT_SERVICE_URL = getServiceUrl("product");
 
       const productRes = await axios.get(
         `${PRODUCT_SERVICE_URL}/product/findById`,
-        { params: { productId: productRefId } }
+        {
+          params: { productId: productRefId },
+        }
       );
 
       const product = productRes.data.data;

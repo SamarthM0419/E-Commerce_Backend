@@ -7,10 +7,7 @@ const getServiceUrl = (serviceName) => {
   const defaults = {
     auth:
       ENV === "production" ? "http://auth-service" : "http://localhost:5001",
-    notification:
-      ENV === "production"
-        ? "http://notification-service"
-        : "http://localhost:5002",
+
     product:
       ENV === "production" ? "http://product-service" : "http://localhost:5003",
     cart:

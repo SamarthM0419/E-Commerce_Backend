@@ -6,29 +6,16 @@ const getServiceUrl = (serviceName) => {
 
   const defaults = {
     auth:
-      ENV === "production"
-        ? "http://auth-service"
-        : "http://localhost:5001",
-    notification:
-      ENV === "production"
-        ? "http://notification-service"
-        : "http://localhost:5002",
+      ENV === "production" ? "http://auth-service" : "http://localhost:5001",
+
     product:
-      ENV === "production"
-        ? "http://product-service"
-        : "http://localhost:5003",
+      ENV === "production" ? "http://product-service" : "http://localhost:5003",
     cart:
-      ENV === "production"
-        ? "http://cart-service"
-        : "http://localhost:5004",
+      ENV === "production" ? "http://cart-service" : "http://localhost:5004",
     order:
-      ENV === "production"
-        ? "http://order-service"
-        : "http://localhost:5005",
+      ENV === "production" ? "http://order-service" : "http://localhost:5005",
     payment:
-      ENV === "production"
-        ? "http://payment-service"
-        : "http://localhost:5006",
+      ENV === "production" ? "http://payment-service" : "http://localhost:5006",
   };
 
   return defaults[serviceName];
